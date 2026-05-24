@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "mongodb-mcp-server@1.4.2",
+        "--readOnly",
+        "--connectionString",
+        "${DB_URI_AI_LOCAL}"
+      ],
+      "env": {
+        "DB_URI_AI_LOCAL": "${DB_URI_AI_LOCAL}"
+      }
+    }
+  }
+}

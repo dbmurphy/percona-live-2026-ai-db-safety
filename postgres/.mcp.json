@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "postgres-mcp-server@0.6.1",
+        "--readOnly",
+        "--connectionString",
+        "${DB_URI_AI_LOCAL}"
+      ],
+      "env": {
+        "DB_URI_AI_LOCAL": "${DB_URI_AI_LOCAL}"
+      }
+    }
+  }
+}

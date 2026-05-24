@@ -1,0 +1,25 @@
+name: schema-pin-check
+
+on:
+  pull_request:
+    paths:
+      - "**/*.sql"
+      - "**/*.js"
+      - "**/*.py"
+      - "**/.schemas/**"
+
+jobs:
+  schema-pin-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run schema-pin check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python ci/scripts/schema-pin-check.py --base "$BASE_SHA" --head "$HEAD_SHA"

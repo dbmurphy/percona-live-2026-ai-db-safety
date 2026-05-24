@@ -1,0 +1,18 @@
+{
+  "collection": "activity",
+  "description": "Append-only event log. ~300M documents in prod.",
+  "fields": [
+    { "name": "user_id",    "bsonType": "long",   "required": true  },
+    { "name": "ts",         "bsonType": "date",   "required": true  },
+    { "name": "event_type", "bsonType": "string", "required": true  },
+    { "name": "payload",    "bsonType": "object", "required": false }
+  ],
+  "indexes": [
+    { "name": "user_id_1_ts_-1",  "key": { "user_id": 1, "ts": -1 } },
+    { "name": "event_type_1_ts_-1", "key": { "event_type": 1, "ts": -1 } }
+  ],
+  "notes": [
+    "Any pipeline without a $match on user_id or event_type is presumed unbounded — abort.",
+    "$lookup into this collection MUST use foreignField user_id."
+  ]
+}

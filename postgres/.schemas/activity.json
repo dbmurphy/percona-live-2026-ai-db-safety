@@ -1,0 +1,26 @@
+{
+  "table": "activity",
+  "description": "Append-only event log. ~300M rows in prod. Partitioned by month on ts in prod; single table in dev.",
+  "columns": [
+    { "name": "user_id",    "type": "bigint",       "nullable": false },
+    { "name": "ts",         "type": "timestamptz",  "nullable": false },
+    { "name": "event_type", "type": "text",         "nullable": false },
+    { "name": "payload",    "type": "jsonb",        "nullable": true  }
+  ],
+  "indexes": [
+    {
+      "name": "activity_user_ts_idx",
+      "columns": ["user_id", "ts"],
+      "method": "btree"
+    },
+    {
+      "name": "activity_event_type_recent_idx",
+      "columns": ["event_type"],
+      "method": "btree",
+      "where": "ts > now() - interval '30 days'"
+    }
+  ],
+  "notes": [
+    "Any query without a user_id or event_type predicate is presumed unbounded — abort and ask."
+  ]
+}

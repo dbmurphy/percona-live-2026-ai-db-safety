@@ -1,0 +1,46 @@
+name: explain-bot
+
+on:
+  pull_request:
+    paths:
+      - "**/*.sql"
+      - "**/*.js"
+      - "**/migrations/**"
+
+jobs:
+  explain:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: shadow
+          POSTGRES_DB: shadow
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      mongo:
+        image: mongo:7
+        ports: ["27017:27017"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install drivers
+        run: pip install psycopg[binary] pymongo
+      - name: Seed shadow databases from .schemas/
+        env:
+          PGURI: postgres://postgres:shadow@localhost:5432/shadow
+          MONGOURI: mongodb://localhost:27017/shadow
+        run: python ci/scripts/explain-bot.py --seed
+      - name: Run EXPLAIN on diff queries
+        env:
+          PGURI: postgres://postgres:shadow@localhost:5432/shadow
+          MONGOURI: mongodb://localhost:27017/shadow
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python ci/scripts/explain-bot.py --base "$BASE_SHA" --head "$HEAD_SHA" --pr "$PR_NUMBER"
